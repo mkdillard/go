@@ -1,4 +1,4 @@
-package adventureGenerator
+package pmAdventureGenerator
 
 import (
   "fmt"
@@ -6,32 +6,36 @@ import (
   "time"
 )
 
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 // Adventure is a struct that contains the information about the adventure.
 type Adventure struct {
   Employer string
   Job string
+  Resources string
   Target string
   Twist string
 }
 
 //NewAdventure returns a new random adventure.
 func NewAdventure() Adventure{
+  employer := determineEmployer()
+  job, resources := determineJob()
+  target := determineTarget()
+  twist := determineTwist()
   return Adventure{
-    Employer: determineEmployer(),
-    Job: determineJob(),
-    Target: determineTarget(),
-    Twist: determineTwist(),
+    Employer: employer,
+    Job: job,
+    Resources: resources,
+    Target: target,
+    Twist: twist,
   }
 }
 
 //NewAdventurePointer returns a pointer to a new random adventure.
 func NewAdventurePointer() *Adventure{
-  return &Adventure{
-    Employer: determineEmployer(),
-    Job: determineJob(),
-    Target: determineTarget(),
-    Twist: determineTwist(),
-  }
+  adv := NewAdventure()
+  return &adv
 }
 
 var employerMap = map[int]string{
@@ -43,16 +47,29 @@ var employerMap = map[int]string{
 }
 
 var jobMap = map[int]string{
-  2: "Blackmail \n  RESOURCES: 2-3",
-  3: "Protection \n  RESOURCES: 4-6",
-  4: "Heist \n  RESOURCES: 2-6",
-  5: "Extortion \n  RESOURCES: 1-5",
-  6: "Military Action \n  RESOURCES: 4-8",
-  7: "Inciting Revolution \n  RESOURCES: 3-6",
-  8: "Transporting Goods \n  RESOURCES: 1-3",
-  9: "Elimination \n  RESOURCES: 2-6",
-  10: "Retrieval \n  RESOURCES: 4-6",
-  11: "Policing \n  RESOURCES: 1-2",
+  2: "Blackmail",
+  3: "Protection",
+  4: "Heist",
+  5: "Extortion",
+  6: "Military Action",
+  7: "Inciting Revolution",
+  8: "Transporting Goods",
+  9: "Elimination",
+  10: "Retrieval",
+  11: "Policing",
+}
+
+var resourceMap = map[int]string{
+  2: "2-3",
+  3: "4-6",
+  4: "2-6",
+  5: "1-5",
+  6: "4-8",
+  7: "3-6",
+  8: "1-3",
+  9: "2-6",
+  10: "4-6",
+  11: "1-2",
 }
 
 var targetMap = map[int]string{
@@ -77,14 +94,12 @@ var twistMap = map[int]string{
   6: "Target has a redundancy plan.",
 }
 
-var r = rand.New(rand.NewSource(time.Now().UnixNano()))
-
 // GenerateNewAdventure populates and adventure struct and returns it.
 // The struct is populated following the rules lain out in the
 // Planet Mercenary core rule book.
 func (a *Adventure) GenerateNewAdventure() {
   a.Employer = determineEmployer()
-  a.Job = determineJob()
+  a.Job, a.Resources = determineJob()
   a.Target = determineTarget()
   a.Twist = determineTwist()
 }
@@ -98,7 +113,7 @@ func (a *Adventure) GenerateNewEmployer() {
 // GenerateNewJob generates a new random job, but does not change
 // any of the other properties of the current adventure.
 func (a *Adventure) GenerateNewJob() {
-  a.Job = determineJob()
+  a.Job, a.Resources = determineJob()
 }
 
 // GenerateNewTarget generates a new random target, but does not change
@@ -118,6 +133,7 @@ func (a *Adventure) GenerateNewTwist() {
 func (a *Adventure) PrintAdventure() {
   fmt.Println("  EMPLOYER: " + a.Employer)
   fmt.Println("  JOB: " + a.Job)
+  fmt.Println("  Resources: " + a.Resources)
   fmt.Println("  TARGET: " + a.Target)
   fmt.Println("  TWIST: " + a.Twist)
   fmt.Println()
@@ -146,27 +162,32 @@ func determineEmployer() string {
   return employer
 }
 
-func determineJob() string {
+func determineJob() (string, string) {
   job := ""
+  resources := ""
   roll := 2 + r.Intn(6) + rand.Intn(6)
   if (roll == 12) {
     newroll1 := 2 + r.Intn(6) + rand.Intn(6)
     newroll2 := 2 + r.Intn(6) + rand.Intn(6)
     if (newroll1 != 12 && newroll2 != 12) {
       job = jobMap[newroll1] + ", " + jobMap[newroll2]
+      resources = resourceMap[newroll1] + ", " + resourceMap[newroll2]
     } else if (newroll1 != 12) {
       job = jobMap[newroll1]
+      resources = resourceMap[newroll1]
     } else if (newroll2 != 12) {
       job = jobMap[newroll2]
+      resources = resourceMap[newroll2]
     } else {
       //Call function recursively.
       //It's possible (unlikely, but possible) we rolled all 6's
-      job = determineJob()
+      job, resources = determineJob()
     }
   } else {
     job = jobMap[roll]
+    resources = resourceMap[roll]
   }
-  return job
+  return job, resources
 }
 
 func determineTarget() string {

@@ -21,15 +21,13 @@ func main() {
 
   http.ListenAndServe(":8000", mux)
   */
-  myAdv := adventureGenerator.NewAdventure()
+  myAdv := pmAdventureGenerator.NewAdventure()
   myAdv.PrintAdventure()
-
-  yourAdv := adventureGenerator.NewAdventurePointer()
-  yourAdv.PrintAdventure()
+  fmt.Println("")
 }
 
 func generateAdventure(w http.ResponseWriter, r *http.Request) {
-  newAdv := &adventureGenerator.Adventure{}
+  newAdv := &pmAdventureGenerator.Adventure{}
   io.WriteString(w, "ADVENTURE:\n")
   io.WriteString(w, "  EMPLOYER: " + newAdv.Employer + "\n")
   io.WriteString(w, "  JOB: " + newAdv.Job + "\n")
