@@ -9,7 +9,7 @@ import (
   "syscall"
 
   "github.com/bwmarrin/discordgo"
-  "github.com/mkdillard/clyde/dicebag/dicebag"
+  "github.com/mkdillard/clyde/dicebag"
 )
 
 // Variables used for command line parameters
