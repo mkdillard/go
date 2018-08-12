@@ -2,19 +2,20 @@ package dicebag
 
 import (
   "math/rand"
+  "strconv"
   "time"
 )
 
 var r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func rollTest(testType string) string{
+func RollTest(testType string) string{
   result := ""
   if testType == "test" {
-    result = rollTest(2,6)
+    result = rollDice(2,6)
   } else if testType == "disadvantage" {
-    result = rollTest(1,6)
+    result = rollDice(1,6)
   } else if testType == "advantage" {
-    result = rollTest(3,6)
+    result = rollDice(3,6)
   }
   return result
 }
@@ -22,15 +23,22 @@ func rollTest(testType string) string{
 func rollDice(numDice int, dieType int) string{
   numRolls := 0
   numSuccess := 0
+  result := "("
   for numRolls < numDice {
+      numRolls++
       roll := 1 + r.Intn(6)
+      result = result + strconv.Itoa(roll)
       if roll > 4 {
         numSuccess++
       }
-      numRolls++
+      if numRolls != numDice {
+        result = result + ", "
+      } else {
+        result = result + ")"
+      }
   }
   if numSuccess > 0 {
-    return "Test Succeeded!"
+    return result + " Test Succeeded!"
   }
-  return "Test Failed!"
+  return result + " Test Failed!"
 }

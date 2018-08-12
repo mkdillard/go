@@ -72,11 +72,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
   if strings.HasPrefix(m.Content, "/r") {
       testResult := ""
       if strings.Contains(m.Content, "1d6") || strings.Contains(m.Content, "rd") || strings.Contains(m.Content, "disadvantage") || strings.Contains(m.Content, "td") {
-        testResult = dicebag.rollTest("disadvantage")
+        testResult = dicebag.RollTest("disadvantage")
       } else if strings.Contains(m.Content, "2d6") || strings.Contains(m.Content, "rt") || strings.Contains(m.Content, "test") || strings.HasSuffix(m.Content, "t") {
-        testResult = dicebag.rollTest("test")
+        testResult = dicebag.RollTest("test")
       } else if strings.Contains(m.Content, "3d6") || strings.Contains(m.Content, "ra") || strings.Contains(m.Content, "advantage") || strings.Contains(m.Content, "ta") {
-        testResult = dicebag.rollTest("advantage")
+        testResult = dicebag.RollTest("advantage")
       }
       s.ChannelMessageSend(m.ChannelID, testResult)
   }
