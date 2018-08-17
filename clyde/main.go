@@ -7,6 +7,7 @@ import (
   "os/signal"
   "strings"
   "syscall"
+  "regexp"
 
   "github.com/bwmarrin/discordgo"
   "github.com/mkdillard/clyde/dicebag"
@@ -68,16 +69,31 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     s.ChannelMessageSend(m.ChannelID, "Ping!")
   }
 
+  genericRollFinderRegex := regexp.MustCompile(".*[0-9]+d[0-9]+.*")
+  genericRollParamRegex := regexp.MustCompile("[0-9]+d[0-9]+")
+
   // Find if the message starts with "/r"
   if strings.HasPrefix(m.Content, "/r") {
-      testResult := ""
-      if strings.Contains(m.Content, "1d6") || strings.Contains(m.Content, "rd") || strings.Contains(m.Content, "disadvantage") || strings.Contains(m.Content, "td") {
-        testResult = dicebag.RollTest("disadvantage")
-      } else if strings.Contains(m.Content, "2d6") || strings.Contains(m.Content, "rt") || strings.Contains(m.Content, "test") || strings.HasSuffix(m.Content, "t") {
-        testResult = dicebag.RollTest("test")
-      } else if strings.Contains(m.Content, "3d6") || strings.Contains(m.Content, "ra") || strings.Contains(m.Content, "advantage") || strings.Contains(m.Content, "ta") {
-        testResult = dicebag.RollTest("advantage")
+    testResult := ""
+    if strings.Contains(m.Content, "1d6") || strings.Contains(m.Content, "rd") || strings.Contains(m.Content, "disadvantage") || strings.Contains(m.Content, "td") {
+      testResult = dicebag.RollTest("disadvantage")
+    } else if strings.Contains(m.Content, "2d6") || strings.Contains(m.Content, "rt") || strings.Contains(m.Content, "test") || strings.HasSuffix(m.Content, "t") {
+      testResult = dicebag.RollTest("test")
+    } else if strings.Contains(m.Content, "3d6") || strings.Contains(m.Content, "ra") || strings.Contains(m.Content, "advantage") || strings.Contains(m.Content, "ta") {
+      testResult = dicebag.RollTest("advantage")
+    } else if strings.Contains(m.Content, "hw") || strings.Contains(m.Content, "hurthaan") {
+      testResult = dicebag.HurthaansWill()
+    } else if genericRollFinderRegex.MatchString(m.Content) {
+      words := strings.Split(m.Content, " ")
+      for _, word := range words{
+        if genericRollParamRegex.MatchString(word){
+          testResult = dicebag.GenericRoll(word)
+          break
+        }
       }
+    }
+    if testResult != ""{
       s.ChannelMessageSend(m.ChannelID, testResult)
+    }
   }
 }
