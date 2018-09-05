@@ -10,6 +10,12 @@ func TestRollTest(t *testing.T){
   disadvantageTest := "disadvantage"
   normalTest := "test"
   advantageTest := "advantage"
+  focusDisadvantageTest := "focusDisadvantage"
+  focusTest := "focusTest"
+  focusAdvantageTest := "focusAdvantage"
+  focusMarksmanDisadvantageTest := "focusMarksmanDisadvantage"
+  focusMarksmanTest := "focusMarksman"
+  focusMarksmanAdvantageTest := "focusMarksmanAdvantage"
 
   ExpectedDisadvantagePass := regexp.MustCompile("\\([1-4]\\) Test Failed!")
   ExpectedDisadvantageFail := regexp.MustCompile("\\([5-6]\\) Test Succeeded!")
@@ -18,9 +24,29 @@ func TestRollTest(t *testing.T){
   ExpectedAdvantagePass := regexp.MustCompile("\\([1-4], [1-4], [1-4]\\) Test Failed!")
   ExpectedAdvantageFail := regexp.MustCompile("\\([1-6], [1-6], [1-6]\\) Test Succeeded!")
 
+  ExpectedFocusDisadvantagePass := regexp.MustCompile("\\([1-3]\\) Test Failed!")
+  ExpectedFocusDisadvantageFail := regexp.MustCompile("\\([4-6]\\) Test Succeeded!")
+  ExpectedFocusNormalPass := regexp.MustCompile("\\([1-3], [1-3]\\) Test Failed!")
+  ExpectedFocusNormalFail := regexp.MustCompile("\\([1-6], [1-6]\\) Test Succeeded!")
+  ExpectedFocusAdvantagePass := regexp.MustCompile("\\([1-3], [1-3], [1-3]\\) Test Failed!")
+  ExpectedFocusAdvantageFail := regexp.MustCompile("\\([1-6], [1-6], [1-6]\\) Test Succeeded!")
+
+  ExpectedMarksmanDisadvantagePass := regexp.MustCompile("\\([1-2]\\) Test Failed!")
+  ExpectedMarksmanDisadvantageFail := regexp.MustCompile("\\([3-6]\\) Test Succeeded!")
+  ExpectedMarksmanNormalPass := regexp.MustCompile("\\([1-2], [1-2]\\) Test Failed!")
+  ExpectedMarksmanNormalFail := regexp.MustCompile("\\([1-6], [1-6]\\) Test Succeeded!")
+  ExpectedMarksmanAdvantagePass := regexp.MustCompile("\\([1-2], [1-2], [1-4]\\) Test Failed!")
+  ExpectedMarksmanAdvantageFail := regexp.MustCompile("\\([1-6], [1-6], [1-6]\\) Test Succeeded!")
+
   disadvantageResult := RollTest(disadvantageTest)
   normalResult := RollTest(normalTest)
   advantageResult := RollTest(advantageTest)
+  focusDisadvantageResult := RollTest(focusDisadvantageTest)
+  focusResult := RollTest(focusTest)
+  focusAdvantageResult := RollTest(focusAdvantageTest)
+  focusMarksmanDisadvantageResult := RollTest(focusMarksmanDisadvantageTest)
+  focusMarksmanResult := RollTest(focusMarksmanTest)
+  focusMarksmanAdvantageResult := RollTest(focusMarksmanAdvantageTest)
 
   if !ExpectedDisadvantageFail.MatchString(disadvantageResult) {
     if !ExpectedDisadvantagePass.MatchString(disadvantageResult) {
@@ -37,6 +63,42 @@ func TestRollTest(t *testing.T){
   if !ExpectedAdvantageFail.MatchString(advantageResult) {
     if !ExpectedAdvantagePass.MatchString(advantageResult) {
       t.Errorf("Advantage Roll incorrect, got %s, want: %s.", advantageResult, "([1-4], [1-4], [1-4]) Test Failed! || (<at least one 5 or 6>) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedFocusDisadvantageFail.MatchString(focusDisadvantageResult) {
+    if !ExpectedFocusDisadvantagePass.MatchString(focusDisadvantageResult) {
+      t.Errorf("Disadvantage Roll incorrect, got %s, want: %s.", focusDisadvantageResult, "([1-3]) Test Failed! || ([4-6]) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedFocusNormalFail.MatchString(focusResult) {
+    if !ExpectedFocusNormalPass.MatchString(focusResult) {
+      t.Errorf("Normal Roll incorrect, got %s, want: %s.", focusResult, "([1-3], [1-3]) Test Failed! || (<at least one 4, 5 or 6>) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedFocusAdvantageFail.MatchString(focusAdvantageResult) {
+    if !ExpectedFocusAdvantagePass.MatchString(focusAdvantageResult) {
+      t.Errorf("Advantage Roll incorrect, got %s, want: %s.", focusAdvantageResult, "([1-3], [1-3], [1-3]) Test Failed! || (<at least one 4, 5 or 6>) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedMarksmanDisadvantageFail.MatchString(focusMarksmanDisadvantageResult) {
+    if !ExpectedMarksmanDisadvantagePass.MatchString(focusMarksmanDisadvantageResult) {
+      t.Errorf("Disadvantage Roll incorrect, got %s, want: %s.", focusMarksmanDisadvantageResult, "([1-2]) Test Failed! || ([3-6]) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedMarksmanNormalFail.MatchString(focusMarksmanResult) {
+    if !ExpectedMarksmanNormalPass.MatchString(focusMarksmanResult) {
+      t.Errorf("Normal Roll incorrect, got %s, want: %s.", focusMarksmanResult, "([1-2], [1-2]) Test Failed! || (<at least one 3, 4, 5 or 6>) Test Succeeded!")
+    }
+  }
+
+  if !ExpectedMarksmanAdvantageFail.MatchString(focusMarksmanAdvantageResult) {
+    if !ExpectedMarksmanAdvantagePass.MatchString(focusMarksmanAdvantageResult) {
+      t.Errorf("Advantage Roll incorrect, got %s, want: %s.", focusMarksmanAdvantageResult, "([1-2], [1-2], [1-2]) Test Failed! || (<at least one 3, 4, 5 or 6>) Test Succeeded!")
     }
   }
 }

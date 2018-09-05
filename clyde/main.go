@@ -95,5 +95,25 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if testResult != ""{
       s.ChannelMessageSend(m.ChannelID, testResult)
     }
+  } else if strings.HasPrefix(m.Content, "/f") {
+    focusResult := ""
+    if strings.Contains(m.Content, "focus test") || strings.Contains(m.content, "ft") {
+      focusResult = dicebag.RollTest("focusTest")
+    } else if strings.Contains(m.Content, "focus disadvantage") || strings.Contains(m.content, "fd") {
+      focusResult = dicebag.RollTest("focusDisadvantage")
+    } else if strings.Contains(m.Content, "focus advantage") || strings.Contains(m.content, "fa") {
+      focusResult = dicebag.RollTest("focusAdvantage")
+    } else if strings.Contains(m.Content, "focus marksman") || strings.Contains(m.content, "fmt") {
+      focusResult = dicebag.RollTest("focusMarksman")
+    } else if strings.Contains(m.Content, "focus marksman disadvantage") || strings.Contains(m.content, "fmd") {
+      focusResult = dicebag.RollTest("focusMarksmanDisadvantage")
+    } else if strings.Contains(m.Content, "focus marksman advantage") || strings.Contains(m.content, "fma") {
+      focusResult = dicebag.RollTest("focusMarksmanAdvantage")
+    }
+
+    if focusResult != ""{
+      s.ChannelMessageSend(m.ChannelID, focusResult)
+    }
   }
+
 }

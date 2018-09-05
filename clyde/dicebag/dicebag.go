@@ -19,6 +19,18 @@ func RollTest(testType string) string{
     result = rollTestDice(1,6)
   } else if testType == "advantage" {
     result = rollTestDice(3,6)
+  } else if testType == "focusTest" {
+    result = rollFocusDice(2,6)
+  } else if testType == "focusDisadvantage" {
+    result = rollFocusDice(1,6)
+  } else if testType == "focusAdvantage" {
+    result = rollFocusDice(3,6)
+  } else if testType == "focusMarksman" {
+    result = rollMarksmanDice(2,6)
+  } else if testType == "focusMarksmanDisadvantage" {
+    result = rollMarksmanDice(1,6)
+  } else if testType == "focusMarksmanAdvantage" {
+    result = rollMarksmanDice(3,6)
   }
   return result
 }
@@ -51,6 +63,31 @@ func GenericRoll(roll string) string{
 func rollTestDice(numDice int, dieType int) string{
   numSuccess := 0
   result := multiRollString(numDice, dieType)
+  numSuccess += strings.Count(result, "5")
+  numSuccess += strings.Count(result, "6")
+  if numSuccess > 0 {
+    return result + " Test Succeeded!"
+  }
+  return result + " Test Failed!"
+}
+
+func rollFocusDice(numDice int, dieType int) string{
+  numSuccess := 0
+  result := multiRollString(numDice, dieType)
+  numSuccess += strings.Count(result, "4")
+  numSuccess += strings.Count(result, "5")
+  numSuccess += strings.Count(result, "6")
+  if numSuccess > 0 {
+    return result + " Test Succeeded!"
+  }
+  return result + " Test Failed!"
+}
+
+func rollMarksmanDice(numDice int, dieType int) string{
+  numSuccess := 0
+  result := multiRollString(numDice, dieType)
+  numSuccess += strings.Count(result, "3")
+  numSuccess += strings.Count(result, "4")
   numSuccess += strings.Count(result, "5")
   numSuccess += strings.Count(result, "6")
   if numSuccess > 0 {
