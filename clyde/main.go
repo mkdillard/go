@@ -31,7 +31,8 @@ func init() {
 func main() {
 
   //open boltdb database
-  db, err := bolt.Open("clyde.db", 0600, nil)
+  var err error //This is a hack to force global variable
+  db, err = bolt.Open("clyde.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,21 +136,26 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
   } else if strings.HasPrefix(m.Content, "/scribe") {
     response := ""
     if strings.Contains(m.Content, "record") {
+
       inputs := strings.SplitN(m.Content, " ", 4)
-      err := scroll.Write(db, m.Content)
+      k := inputs[2]
+      v := inputs[3]
+      err := scroll.Write(db, k, v)
       if err != nil {
-        response = fmt.Sprintf("I'm sorry I was unable to record your information about %s", inputs[2])
-        log.Printf("Error writing key: %s and value: %s to database: %v", inputs[2], inputs[3], err)
+        response = fmt.Sprintf("I'm sorry I was unable to record your information about %s", k)
+        log.Printf("Error writing key: %s and value: %s to database: %v", k, v, err)
       }
     } else if strings.Contains(m.Content, "read") {
-      k := strings.Split(m.Content, " ")[3]
-      var v *string
-      err := scroll.Read(db, k, v)
+      inputs := strings.Split(m.Content, " ")
+      fmt.Println(inputs)
+      k := inputs[2]
+      v := ""
+      err := scroll.Read(db, k, &v)
       if err != nil {
         response = "I am sorry I seem to have misplaced my scrolls I couldn't find what you wanted"
         log.Printf("Error reading from database: %v", err)
       }
-      if v == nil {
+      if v == "" {
         response = fmt.Sprintf("Sorry I was unable to find %s in my records", k)
       } else {
         response = fmt.Sprintf("I found information about %s:\n%s", k, v)
