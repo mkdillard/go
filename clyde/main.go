@@ -3,6 +3,7 @@ package main
 import (
   "flag"
   "fmt"
+  "log"
   "os"
   "os/signal"
   "strings"
@@ -10,7 +11,9 @@ import (
   "regexp"
 
   "github.com/bwmarrin/discordgo"
+  "github.com/boltdb/bolt"
   "github.com/mkdillard/clyde/dicebag"
+  "github.com/mkdillard/clyde/scroll"
 )
 
 // Variables used for command line parameters
@@ -18,17 +21,32 @@ var (
   Token string
 )
 
+var db *bolt.DB
+
 func init() {
   flag.StringVar(&Token, "t", "", "Bot Token.")
   flag.Parse()
 }
 
 func main() {
+
+  //open boltdb database
+  db, err := bolt.Open("clyde.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+  //Make sure db buckets exist
+  err = scroll.CreateBuckets(db)
+  if err != nil {
+    log.Fatal("error creating db buckets: ", err)
+  }
+
   // Create new discord
   dg, err := discordgo.New("Bot " + Token)
   if err != nil {
-    fmt.Println("error creating Discord session: ", err)
-    return
+    log.Fatal("error creating Discord session: ", err)
   }
 
   //Register the messageCreate func as a callback for MessageCreate events.
@@ -114,6 +132,33 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if focusResult != ""{
       s.ChannelMessageSend(m.ChannelID, focusResult)
     }
-  }
+  } else if strings.HasPrefix(m.Content, "/scribe") {
+    response := ""
+    if strings.Contains(m.Content, "record") {
+      inputs := strings.SplitN(m.Content, " ", 4)
+      err := scroll.Write(db, m.Content)
+      if err != nil {
+        response = fmt.Sprintf("I'm sorry I was unable to record your information about %s", inputs[2])
+        log.Printf("Error writing key: %s and value: %s to database: %v", inputs[2], inputs[3], err)
+      }
+    } else if strings.Contains(m.Content, "read") {
+      k := strings.Split(m.Content, " ")[3]
+      var v *string
+      err := scroll.Read(db, k, v)
+      if err != nil {
+        response = "I am sorry I seem to have misplaced my scrolls I couldn't find what you wanted"
+        log.Printf("Error reading from database: %v", err)
+      }
+      if v == nil {
+        response = fmt.Sprintf("Sorry I was unable to find %s in my records", k)
+      } else {
+        response = fmt.Sprintf("I found information about %s:\n%s", k, v)
+      }
+    }
 
+    if response != ""{
+      s.ChannelMessageSend(m.ChannelID, response)
+    }
+
+  }
 }
