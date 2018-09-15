@@ -2,10 +2,18 @@ package scroll
 
 import (
   "fmt"
+  "io"
   "strings"
 
   "github.com/boltdb/bolt"
 )
+
+func BackupScroll(db *bolt.DB, w io.Writer) error {
+  return db.View(func(tx *bolt.Tx) error{
+    _, err := tx.WriteTo(w)
+    return err
+  })
+}
 
 func CreateBuckets(db *bolt.DB) error {
   return db.Update(func(tx *bolt.Tx) error {

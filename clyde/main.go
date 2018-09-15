@@ -3,12 +3,14 @@ package main
 import (
   "flag"
   "fmt"
+  "io"
   "log"
   "os"
   "os/signal"
+  "regexp"
   "strings"
   "syscall"
-  "regexp"
+  "time"
 
   "github.com/bwmarrin/discordgo"
   "github.com/boltdb/bolt"
@@ -159,6 +161,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if response != ""{
       s.ChannelMessageSend(m.ChannelID, response)
     }
-
+  } else if strings.Compare(m.Content, "/backupScroll") == 0 {
+    reader, writer := io.Pipe()
+    err := scroll.BackupScroll(db, writer)
+    if err != nil {
+      s.ChannelMessageSend(m.ChannelID, "Error creating a backup copy of my scrolls")
+      log.Printf("Error creating backup of scrolls: %v", err)
+    } else {
+        currentTime := time.Now()
+        filename := "clyde.db_" + currentTime.Format("2006_01_02")
+        s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{File: &discordgo.File{Name: filename, Reader: reader}, Content:"Here is a backup copy of my scrolls"})
+    }
   }
 }
