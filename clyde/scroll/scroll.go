@@ -28,17 +28,30 @@ func CreateBuckets(db *bolt.DB) error {
 func Read(db *bolt.DB, key string, value *string) error {
   return db.View(func(tx *bolt.Tx) error {
     b := tx.Bucket([]byte("Dictionary"))
-    v := b.Get([]byte(key))
-    *value = fmt.Sprintf("%v", v)
+    if b != nil {
+      v := b.Get([]byte(key))
+      if v != nil {
+       *value = bytesToString(v)
+      }
+    } else {
+      fmt.Println("Dictionary bucket was nil")
+    }
     return nil
   })
 }
 
-func Write(db *bolt.DB, message string) error {
+func Write(db *bolt.DB, key string, value string) error {
   return db.Update(func(tx *bolt.Tx) error {
-    inputs := strings.SplitN(message, " ", 4)
     b := tx.Bucket([]byte("Dictionary"))
-    err := b.Put([]byte(inputs[2]), []byte(inputs[3]))
-    return err
+    if b != nil {
+      err := b.Put([]byte(key), []byte(value))
+      return err
+    }
+    fmt.Println("bucket Dictionary was nil")
+    return nil
   })
+}
+
+func bytesToString(data []byte) string {
+  return string(data[:])
 }
