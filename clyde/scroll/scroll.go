@@ -3,14 +3,17 @@ package scroll
 import (
   "fmt"
   "io"
-  "strings"
+  "log"
 
   "github.com/boltdb/bolt"
 )
 
 func BackupScroll(db *bolt.DB, w io.Writer) error {
+  log.Printf("Before db call")
   return db.View(func(tx *bolt.Tx) error{
+    log.Printf("before tx.WriteTo call")
     _, err := tx.WriteTo(w)
+    log.Printf("after tx.WriteTo call, err: %v", err)
     return err
   })
 }

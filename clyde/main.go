@@ -146,10 +146,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
       if err != nil {
         response = fmt.Sprintf("I'm sorry I was unable to record your information about %s", k)
         log.Printf("Error writing key: %s and value: %s to database: %v", k, v, err)
+      } else {
+        response = fmt.Sprintf("%s successfully added to my scrolls", k)
       }
     } else if strings.Contains(m.Content, "read") {
       inputs := strings.Split(m.Content, " ")
-      fmt.Println(inputs)
       k := inputs[2]
       v := ""
       err := scroll.Read(db, k, &v)
@@ -167,16 +168,23 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if response != ""{
       s.ChannelMessageSend(m.ChannelID, response)
     }
-  } else if strings.Compare(m.Content, "/backupScroll") == 0 {
+  } else if strings.Compare(m.Content, "/backupScrolls") == 0 {
+    log.Printf("Creating database backup")
     reader, writer := io.Pipe()
-    err := scroll.BackupScroll(db, writer)
-    if err != nil {
-      s.ChannelMessageSend(m.ChannelID, "Error creating a backup copy of my scrolls")
-      log.Printf("Error creating backup of scrolls: %v", err)
-    } else {
-        currentTime := time.Now()
-        filename := "clyde.db_" + currentTime.Format("2006_01_02")
-        s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{File: &discordgo.File{Name: filename, Reader: reader}, Content:"Here is a backup copy of my scrolls"})
-    }
+    var err error
+    go func() {
+      defer writer.Close()
+      err = scroll.BackupScroll(db, writer)
+      if err != nil {
+        s.ChannelMessageSend(m.ChannelID, "Error creating a backup copy of my scrolls")
+        log.Printf("Error creating backup of scrolls: %v", err)
+      }
+    }()
+
+    log.Printf("after scroll thread started")
+    currentTime := time.Now()
+    filename := currentTime.Format("2006_01_02") + "_clyde.db"
+    s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{File: &discordgo.File{Name: filename, Reader: reader}, Content:"Here is a backup copy of my scrolls"})
+    log.Printf("Finished database backup")
   }
 }
